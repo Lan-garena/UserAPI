@@ -1,0 +1,46 @@
+services:
+  nginx:
+      image: ghcr.io/ronasit/php-nginx-dev:8.3
+      working_dir: /app
+      ports:
+          - 80:80
+          - 443:443
+      volumes:
+          - ./:/app
+      links:
+        - pgsql
+        - pgsql_test
+      environment:
+          WEB_DOCUMENT_ROOT: /app/public
+          WEB_DOCUMENT_INDEX: index.php
+          REDIS_PORT: "6379"
+          php.xdebug.max_nesting_level: 250
+          XDEBUG_PROFILER_ENABLE: 0
+          XDEBUG_START_WITH_REQUEST: 1
+          XDEBUG_DISCOVER_CLIENT_HOST: 0
+          XDEBUG_CLIENT_PORT: 9000
+          XDEBUG_CLIENT_HOST: host.docker.internal
+  pgsql:
+      image: bitnami/postgresql:16
+      ports:
+          - 5432:5432
+      environment:
+          ALLOW_EMPTY_PASSWORD: yes
+      volumes:
+          - .:/app
+
+  pgsql_test:
+    image: bitnami/postgresql:16
+    ports:
+      - 5433:5432
+    environment:
+      ALLOW_EMPTY_PASSWORD: yes
+    volumes:
+      - .:/app
+
+  redis:
+    image: bitnami/redis:7.2
+    environment:
+      ALLOW_EMPTY_PASSWORD: yes
+    ports:
+        - 6379:6379
